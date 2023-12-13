@@ -5,17 +5,23 @@ import os
 class PayloadCollection:
     username = os.environ.get("GLUTZ_BST_USER")
     password = os.environ.get("GLUTZ_BST_PASS")
+    email_user = os.environ.get("EMAIL_BST_USER")
+    email_pass = os.environ.get("EMAIL_BST_PASS")
     eAccess_service_name = "eAccess.service"
     headers = {"Content-Type": "application/json"}
-    GlutzUrl = "31.24.10.138"
-    glutzRpcServerUrl = f"http://{username}:{password}@{GlutzUrl}:8333/rpc/"
+    # werk-fraubrunnen.onlinezuko.ch
+    GlutzUrl = "werk-fraubrunnen.onlinezuko.ch"
+    glutzRpcServerUrl = f"https://{username}:{password}@{GlutzUrl}/rpc/"
     backupGlutzRpcUrl = f"http://{username}:{password}@127.0.0.1:8333/rpc/"
-    glutzWsServerUrl = f"ws://{username}:{password}@{GlutzUrl}:8333"
-    backupWsServerPort = 8800
-    backupWsServerIp = "192.168.1.251"
-    backupWsServerUrl = f"ws://{backupWsServerIp}:{backupWsServerPort}"
+    glutzWsServerUrl = f"wss://{username}:{password}@{GlutzUrl}"
+    backupServerPort = 8800
+    backupServerIp = "192.168.1.251"
+    backupServerUrl = f"ws://{backupServerIp}:{backupServerPort}"
     backupGlutzUrl = f"ws://{username}:{password}@127.0.0.1:8333"
-    towFactorAuthenticationId = "5022"  # in Glutz door Properties
+    towFactorAuthenticationId = "5025"  # in Glutz door Properties
+    masterDoorId = "5026"
+    controlledDoorNotification = "5027"
+    masterCodeActionProfileId = "1001"  # in Glutz Codes menu profile non Default
     IO_Module_Type = 103
     E_Reader_IP55_Type = 102
     E_Reader_Type = 101
@@ -25,28 +31,34 @@ class PayloadCollection:
 
     IO_ModuleRelay_1 = 2
     IO_ModuleRelay_2 = 4
-    #  IO Extender info and spec 3'batteryPowered'
+    #  IO Extender info and spec 3batteryPowered
     IO_Extender_Type = 80
     IO_Extender_output_1_openDoor = 2
-    IO_Extender_output_2 = 4
-    IO_Extender_output_3 = 8
+    IO_Extender_output_2_openDoorIsActivate = 4
+    IO_Extender_output_3_Led_masterCode = 8
     IO_Extender_output_4 = 16
     IO_Extender_output_5 = 32
-    IO_Extender_output_6 = 64
-    IO_Extender_output_7_Panic = (
-        128  # AlarmSystem Panic activate the output for 3 Seconds
+    IO_Extender_output_6_Panic = (
+        64  # AlarmSystem Panic activate the output for 3 Seconds
     )
+
+    IO_Extender_output_7_PanicIsActivate = 128
     IO_Extender_output_8_disarm = 256
     IO_Extender_input_1_kurzzeitentriegelung = "Input 1"
-    IO_Extender_input_2_türzustand = "Input 2"
-    IO_Extender_input_7_austrittstaster = (
+    IO_Extender_input_2_tuerzustandVirtual = "Input 2"
+    IO_Extender_input_3_tuerzustand = "Input 3"
+    IO_Extender_input_6_austrittstaster = (
+        "Input 6"  # activate AlarmSystem after 45 Seconds Output 8
+    )
+    IO_Extender_input_7_signal_EMA_virtual = (
         "Input 7"  # activate AlarmSystem after 45 Seconds Output 8
     )
     IO_Extender_input_8_ZustandEma = "Input 8"  # AlarmSystem state
+    state_all_inputs_low = 0
     state_input_1_High = 1
     state_input_2_High = 2
     state_input_3_High = 4
-    state_input_4_High = 8
+    state_input_4_High = 8  #  clean-tek Schleuse activ
     state_input_5_High = 16
     state_input_6_High = 32
     state_input_7_High = 64
@@ -68,7 +80,6 @@ class PayloadCollection:
     state_input_2_8_High = 130
     state_input_7_8_High = 192
 
-    masterCodeActionProfileId = "1002"  # in Glutz Codes menu profile non Default
     message = {
         "method": "registerObserver",
         "params": [

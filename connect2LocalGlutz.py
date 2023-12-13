@@ -1,29 +1,17 @@
 import asyncio
+import threading
+
 import websockets.exceptions
 from websockets import connect
 
+from accessManager import AccessManager
+from emailManager import send_email
+from messageFilter import MessageFilter
 from observer import *
 from payloadCollection import *
-from emailManager import *
-import threading
-from accessManager import AccessManager
-from messageFilter import MessageFilter
-from startStopGlutz import *
 
 # Define the global variable 'doors_instances' at the module level
 doors_instances = {}
-
-
-def sendMail_afterException(serverInfo, exeption):
-    try:
-        sendGmail_ramziVersion(
-            f"Hoi We don't have a connection. Please control the {serverInfo} Server.",
-            subject="hallo from the event Server.",
-            text_1=f"Error: {exeption}",
-        )
-    except Exception as e:
-        print(e)
-        pass
 
 
 def delete_door_instance(door_id):
@@ -52,7 +40,6 @@ def create_observer():
     return Observer(access_manager)
 
 
-
 async def handle_door(door_id, data):
     add_door_instance(door_id=door_id)
 
@@ -67,21 +54,21 @@ async def handle_door(door_id, data):
     else:
         print(f"Observer is None for door_id: {door_id}")
 
+
 glutzServe_isOffline = True
+
 
 def update_GlutzServerState(is_offline):
     global glutzServe_isOffline
     glutzServe_isOffline = is_offline
 
 
-
-
 async def listen():
     counter = 0
     connected = False
     url = PayloadCollection.backupGlutzUrl
-    while  glutzServe_isOffline:
-        print(f'insinde the while : {glutzServe_isOffline}')
+    while glutzServe_isOffline:
+        print(f"insinde the while : {glutzServe_isOffline}")
         try:
             async with connect(url) as websocket:
                 await websocket.send(json.dumps(PayloadCollection.message))
@@ -90,10 +77,10 @@ async def listen():
                 connected = True
                 while True:
                     message = json.loads(await websocket.recv())
-                    print(f'message listen() in connect2LocalGlutz: {message}')
+                    print(f"message listen() in connect2LocalGlutz: {message}")
                     message_filter = MessageFilter()
                     data = message_filter.messageFilter(message=message)
-                    door = message_filter.get_door_id(message=message)
+                    door = message_filter.get_door_id(data=message)
 
                     if door is not None:
                         if door not in doors_instances:
@@ -106,18 +93,17 @@ async def listen():
                             await observer.observer(data)
                         # ... Continue processing existing door_ids ...
         except ConnectionRefusedError:
-                print(
-                    f"Hoi We don't have a connection. Please control the Server: {url} ."
-                )
-                await asyncio.sleep(1)
-                
-                counter += 1
+            print(f"Hoi We don't have a connection. Please control the Server: {url} .")
+            await asyncio.sleep(1)
 
-                if counter == 50 or counter == 500 or counter == 5000:
-                    exceptionMessage = "ConnectionRefusedError"
-                    sendMail_afterException(
-                        serverInfo=url, exeption=exceptionMessage
-                    )
+            counter += 1
+
+            if counter == 50 or counter == 500 or counter == 5000:
+                exceptionMessage = "ConnectionRefusedError"
+                send_email(
+                    subject="there is Exception in connect2LocalGlutz at Listen Def  ",
+                    message=f"error: {exceptionMessage}",
+                )
 
         except (
             websockets.exceptions.ConnectionClosedOK,
@@ -130,8 +116,9 @@ async def listen():
                 exceptionMessage = (
                     "websockets.exceptions.ConnectionClosedOK-ConnectionClosedError,"
                 )
-                sendMail_afterException(
-                    serverInfo=url, exeption=exceptionMessage
+                send_email(
+                    subject="there is Exception in connect2LocalGlutz at Listen Def  ",
+                    message=f"error: {exceptionMessage}",
                 )
 
         except OSError:
@@ -142,8 +129,9 @@ async def listen():
             counter += 1
             if counter == 50 or counter == 500 or counter == 5000:
                 exceptionMessage = "OsError"
-                sendMail_afterException(
-                    serverInfo=url, exeption=exceptionMessage
+                send_email(
+                    subject="there is Exception in connect2LocalGlutz at Listen Def  ",
+                    message=f"error: {exceptionMessage}",
                 )
 
         except asyncio.exceptions.TimeoutError:
@@ -151,39 +139,43 @@ async def listen():
             counter += 1
             if counter == 50 or counter == 500 or counter == 5000:
                 exceptionMessage = "asyncio.exceptions.TimeoutError,"
-                sendMail_afterException(
-                    serverInfo=url, exeption=exceptionMessage
+                send_email(
+                    subject="there is Exception in connect2LocalGlutz at Listen Def  ",
+                    message=f"error: {exceptionMessage}",
                 )
+
         except Exception as e:
-            print(f'exeptoioon : {e}')
-            #sendMail_afterException(serverInfo=serverInfo, exeption=e)
+            print(f"exeptoioon : {e}")
+            # sendMail_afterException(serverInfo=serverInfo, exeption=e)
 
         except websockets.ConnectionClosed:
             print("except websockets.ConnectionClosed:")
             counter += 1
             if counter == 50 or counter == 500 or counter == 5000:
                 exceptionMessage = "asyncio.exceptions.TimeoutError,"
-                sendMail_afterException(
-                    serverInfo=url, exeption=exceptionMessage
+                send_email(
+                    subject="there is Exception in connect2LocalGlutz at Listen Def  ",
+                    message=f"error: {exceptionMessage}",
                 )
 
             continue
         connected = False
-           
+
 
 async def main():
     try:
         await asyncio.gather(
-            listen(
-            ),
-  
+            listen(),
         )
     except KeyboardInterrupt:
         print("Server shutting down...")
     except Exception as e:
         print(f"An error occurred: {e}")
-        sendMail_afterException(serverInfo='localhostGlutz',exeption=f"General Error {e}")
+        send_email(
+            subject="there is Exception in connect2LocalGlutz at Listen Def  ",
+            message=f"error: {e}",
+        )
 
 
-#if __name__ == "__main__":
-   # asyncio.run(main())
+# if __name__ == "__main__":
+# asyncio.run(main())

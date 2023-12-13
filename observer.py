@@ -1,4 +1,4 @@
-from accessManager import AccessManager
+from emailManager import send_email
 
 
 class Observer:
@@ -17,6 +17,10 @@ class Observer:
 
     async def observer(self, data):
         events = data["events"][0]
+        reader_bs6 = "555.865.897"
+        reader_bs7 = "555.989.578"
+        clean_tek_doors = [reader_bs6, reader_bs7]
+
         try:
             if events["event"] == "RFID Media":
                 badgeId = events["publicMediaLabel"]
@@ -28,15 +32,15 @@ class Observer:
 
             elif events["event"] == "Code":
                 panic = False
-                print(f"observer envents : {events}")
                 code = events["code"]
                 code_reader = data["deviceid"]
-                if 'condition' in events:
-                    if events['condition'] == 'Triangle Button':
-                        print(' Bedrohungsalarm')
-                        panic = True
-                
-                await self.access_manager.code_is_given(code=code, reader=code_reader,is_panic=panic)
+                """ if "condition" in events:
+                    if events["condition"] == "Triangle Button":
+                        print(" Bedrohungsalarm")
+                        panic = True"""
+                await self.access_manager.code_is_given(
+                    code=code, reader=code_reader, is_panic=panic
+                    )
             else:
                 for key, value in events.items():
                     if key == "condition":
@@ -46,6 +50,11 @@ class Observer:
                         elif events["condition"] == "Rising Edge":
                             print("Rising Edge")
                     else:
-                        await self.other_kind_of_message(events)
+                         await self.other_kind_of_message(events)
         except Exception as s:
-            print(f"from Observer/def observer: {s} + \n events::{events}")
+          #  print(f"from Observer/def observer: {s} + \n events::{events}")
+
+            send_email(
+                subject="there is exception in inputState at observer.py",
+                message=f"error: {s}",
+            )

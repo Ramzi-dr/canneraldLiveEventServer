@@ -1,21 +1,22 @@
 import jsonrpclib
-import asyncio
-from emailManager import sendGmail_ramziVersion
+#from activateAlarmSys import ActivateAlarmSys
+from emailManager import send_email
 from payloadCollection import PayloadCollection
 from rpcAction import RpcAction
-from activateAlarmSys import ActivateAlarmSys
-
+from rpcCommands import RpcCommands
 
 url = PayloadCollection.glutzRpcServerUrl
 
 
-def update_rpcUrl(new_url):
-    global url
-    url = new_url
+# def update_rpcUrl(new_url):
+#     global url
+#     url = new_url
 
 
 async def inputStateEvent(deviceId, inputNum, inputState):
     rpcAction = RpcAction()
+  #  print(f"inputNum : {inputNum}")
+ #   print(f"inputState: {inputState}")
     if (
         inputNum == PayloadCollection.IO_Extender_input_1_kurzzeitentriegelung
         and inputState == 1
@@ -26,11 +27,15 @@ async def inputStateEvent(deviceId, inputNum, inputState):
             is_Extender=True,
         )
     if (
-        inputNum == PayloadCollection.IO_Extender_input_7_austrittstaster
+        inputNum == PayloadCollection.IO_Extender_input_6_austrittstaster
         and inputState == 0
     ):
-        activateAlarmSys = ActivateAlarmSys(deviceId=deviceId)
-        activateAlarmSys.activate_timer()
+        RpcCommands().openDoor_short(
+            deviceId=deviceId,
+            outputNum=PayloadCollection.IO_Extender_output_1_openDoor,
+        )
+        # activateAlarmSys = ActivateAlarmSys(deviceId=deviceId)
+        # activateAlarmSys.activate_timer()
 
 
 def getInputsState(
@@ -50,27 +55,23 @@ def getInputsState(
 
         return state
     except Exception as e:
-        sendMail_afterException(exception=e)
+        send_email(
+            subject="there is exception in inputState at getInputsState",
+            message=f"error: {e}",
+        )
         print(f"Error: inputsState/ getInputsState= {e}")
 
 
 def activateReaderSignal(deviceId):
     try:
         server = jsonrpclib.Server(url)
-        signal = server.eAccess.deviceOperation(
+        server.eAccess.deviceOperation(
             "Signal", {"deviceid": deviceId, "signallingid": 30, "Buzzer": "4"}
         )
 
     except Exception as e:
-        print(f"Error: inputState.py/activateReaderSignal={e}")
-
-
-def sendMail_afterException(exception):
-    try:
-        sendGmail_ramziVersion(
-            f"Error in inputsState file \nError: {exception}",
-            subject="hallo from  event server .",
+        send_email(
+            subject="there is exception in inputState at activateReaderSIgnal",
+            message=f"error: {e}",
         )
-    except Exception as e:
-        print(f"Error: inputState.py/ sendMail_afterEception:{e}")
-        pass
+        print(f"Error: inputState.py/activateReaderSignal={e}")

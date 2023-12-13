@@ -1,6 +1,8 @@
+from emailManager import send_email
 from inputsState import inputStateEvent
 from usersData import UsersData
 from doorsData import DoorsData
+import asyncio
 
 
 class MessageFilter:
@@ -24,10 +26,10 @@ class MessageFilter:
         if "params" in message:
             if message["params"][0] in (
                 "AccessPointPropertyData",
-                "codes",
+                "Codes",
                 "Media",
                 "UsersGroups",
-                "Rights",
+                "Rights",'ObservedStates'
             ):
                 await self.get_doors()
                 await self.get_users()
@@ -38,6 +40,7 @@ class MessageFilter:
         inputNum = None
         if "deviceid" in condition:
             deviceId = condition["deviceid"]
+
             if "events" in condition:
                 if "condition" in condition["events"][0]:
                     if condition["events"][0]["condition"] == "Rising Edge":
@@ -103,5 +106,33 @@ class MessageFilter:
                     elif key == "modified":
                         return None
         except TypeError as type:
-            print(f"Error  messageFilter.py/def get_door_id {type}")
+          #  print(f"Error  messageFilter.py/def get_door_id {type}")
+            send_email(subject="get_door_id", message=f"error : {type}")
             return None
+        # Add this method to your MessageFilter class
+        
+    # async def get_users_with_retry(self, max_retries=3):
+    #     for attempt in range(max_retries):
+    #         try:
+    #             users_data = await self.get_users()
+    #             if users_data is not None:
+    #                 return users_data
+    #         except Exception as e:
+    #             print(f"Error getting users (attempt {attempt + 1}): {e}")
+    #             await asyncio.sleep(2)  # Wait for a short duration before retrying
+
+    #     print(f"Failed to get users after {max_retries} attempts.")
+    #     return None  # or raise an exception, depending on your use case
+    
+    # async def get_doors_with_retry(self, max_retries=3):
+    #     for attempt in range(max_retries):
+    #         try:
+    #             result = await self.get_doors()
+    #             if result is not None:
+    #                 return result
+    #         except Exception as e:
+    #             print(f"Error getting doors (attempt {attempt + 1}): {e}")
+    #             await asyncio.sleep(2)  # Wait for a short duration before retrying
+    #     print(f"Failed to get doors after {max_retries} attempts.")
+    #     return None  # or raise an exception, depending on your use case
+

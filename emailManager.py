@@ -1,87 +1,45 @@
-from redmail import gmail
-from datetime import datetime
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 import pytz
-import socket
 
-gmail.username = "bst.einbruchschutz@gmail.com"
-gmail.password = "ssnnpngxsrnjdsvi"
+from payloadCollection import PayloadCollection
 
 
-def sendGmail_svenVersion(*args, subject):
-    gmail.send(
-        subject=f"[Event-Server] {get_host_name()} von eAccess-Webclient",
-        receivers=["ramzi.d@outlook.com"],
-        html=f"""
-             <h2>Guten Tag</h2>
-             <p> </p>
-             <p>Ein Server ist nicht mehr erreichbar! Nachfolgend die Informationen vom Server:</p>
-             <p>PC-Name:     {get_host_name()}    </p>
-             <p>PC-Adresse: {get_local_ip()} </p>
-             <p>Der Server ist hat keine Verbindung seit: </p>
-             <p>Datum:      {datum()}  </p>
-             <p>Zeit:       {time()}  </p>
-             <p>Bitte Verbindung kontrollieren und wiederherstellen.
-             <br><h2>BST Einbruchschutz</h2></p>
-         """,
-    )
 
+def send_email(
+    subject,
+    message,
+):
+    # Email configuration
+    from_email = PayloadCollection.email_user
+    password = PayloadCollection.email_pass
+    smtp_server = "smtp.office365.com"
+    smtp_port = 587
+    starttls = True
+    username = PayloadCollection.email_user
+    to_email = ["ramzi.d@outlook.com", "rdr@einbruchschutz.ch"]
 
-def sendGmail_ramziVersion(*args, subject, text_1, text_2=''):
-    gmail.send(
-        subject=subject,
-        receivers=["ramzi.d@outlook.com"],
-        html=f"""
-             <h2>Guten Tag</h2>
-             <p> {args}</p>
-             <p><{text_1}/p>
-             <p></p>
-             <p>{text_2}</p>
-             <p></p>
-             <p>Datum:      {datum()}  </p>
-             <p>Zeit:       {time()}  </p>
-             <p>
-             <br><h2>BST Einbruchschutz</h2></p>
-         """,
-    )
+    # Create a MIMEText object to represent the email message
+    msg = MIMEMultipart()
+    msg["From"] = from_email
+    msg["To"] = ", ".join(to_email)
+    msg["Subject"] = f"From Cannerald eventServer:{subject} "
+    msg.attach(MIMEText(message, "plain"))
 
-
-def datum():
-    current_date = datetime.now()
-    swiss_date_format = current_date.strftime("%d.%m.%Y")
-    return swiss_date_format
-
-
-def time():
-    zurich_tz = pytz.timezone("Europe/Zurich")
-
-    # Get the current time with the Zurich timezone
-    current_time = datetime.now(zurich_tz)
-
-    # Format the time in Swiss format
-    swiss_time_format = current_time.strftime("%H:%M:%S")
-
-    # Print the time in Swiss format with Zurich timezone
-    return swiss_time_format
-
-
-def get_local_ip():
     try:
-        # Get the hostname of the machine
-        hostname = socket.gethostname()
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        if starttls:
+            server.starttls()
+        server.login(username, password)
 
-        # Get the IP address associated with the hostname
-        local_ip = socket.gethostbyname(hostname)
+        for recipient in to_email:
+            server.sendmail(from_email, recipient.strip(), msg.as_string())
 
-        return local_ip
-    except socket.gaierror as e:
-        return f"there is Error: {e} please control ur script"
+        # Close the connection
+        server.quit()
 
-
-def get_host_name():
-    try:
-        # Get the hostname of the machine
-        hostname = socket.gethostname()
-        return hostname
+     #   print("Email sent successfully.")
     except Exception as e:
-        print(f"Error occurred: {e}")
-        return f"there is Error: {e} please control ur script"
+        print("Error sending email:", str(e))

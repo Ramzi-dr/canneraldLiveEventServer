@@ -1,22 +1,10 @@
 import threading
 
 from accessManager import AccessManager
-from emailManager import sendGmail_ramziVersion
+from emailManager import send_email
 from observer import Observer
 
 doors_instances = {}
-
-
-def sendMail_afterException(serverInfo, exception):
-    try:
-        sendGmail_ramziVersion(
-            f"Hoi We don't have a connection. the server with ip : {serverInfo} have a condition.",
-            subject="hallo from the event Server.",
-            text_1=f"Error: {exception}",
-        )
-    except Exception as e:
-        print(f"Error: listenDefExtentions.py/ sendMAil_afterException= {e}")
-        pass
 
 
 def delete_door_instance(door_id):
@@ -24,7 +12,6 @@ def delete_door_instance(door_id):
     thread_id = threading.current_thread().ident
     if (thread_id, door_id) in doors_instances:
         del doors_instances[(thread_id, door_id)]
-        print(f"Threading stopped for door instance. {door_id}")
 
 
 def add_door_instance(door_id, users_data, doors_data):
@@ -40,13 +27,12 @@ def create_observer(users_data, doors_data):
         doors_instances, delete_door_instance, users_data, doors_data
     )
     if access_manager is None:
-        print("Access manager is None in create_observer()")
         return None
     return Observer(access_manager)
 
 
 async def handle_door(door_id, data, users_data, doors_data):
-    if door_id is not None and data is not None:
+    if door_id is not None and data is not None and users_data and doors_data:
         try:
             add_door_instance(
                 door_id=door_id,
@@ -62,4 +48,9 @@ async def handle_door(door_id, data, users_data, doors_data):
                 await observer.observer(data)
 
         except Exception as e:
-            print(f"Error: listenDefExtentions.py/ at handle door function : {e}")
+            send_email(
+                subject= "exception in listenDefExtentions.py at handle_door", 
+                message=f'''error : {e}  \n users_data :{users_data} \n doors_data :{doors_data} \n
+                data :{data}\n
+                door_id:{door_id} '''
+            )
