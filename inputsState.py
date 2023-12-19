@@ -1,9 +1,11 @@
 import jsonrpclib
-#from activateAlarmSys import ActivateAlarmSys
+
+# from activateAlarmSys import ActivateAlarmSys
 from emailManager import send_email
 from payloadCollection import PayloadCollection
 from rpcAction import RpcAction
 from rpcCommands import RpcCommands
+
 
 url = PayloadCollection.glutzRpcServerUrl
 
@@ -15,8 +17,8 @@ url = PayloadCollection.glutzRpcServerUrl
 
 async def inputStateEvent(deviceId, inputNum, inputState):
     rpcAction = RpcAction()
-  #  print(f"inputNum : {inputNum}")
- #   print(f"inputState: {inputState}")
+    #  print(f"inputNum : {inputNum}")
+    #   print(f"inputState: {inputState}")
     if (
         inputNum == PayloadCollection.IO_Extender_input_1_kurzzeitentriegelung
         and inputState == 1
@@ -59,14 +61,14 @@ def getInputsState(
             subject="there is exception in inputState at getInputsState",
             message=f"error: {e}",
         )
-        print(f"Error: inputsState/ getInputsState= {e}")
 
 
-def activateReaderSignal(deviceId):
+def activateReaderSignal(deviceId, signal):
     try:
         server = jsonrpclib.Server(url)
+
         server.eAccess.deviceOperation(
-            "Signal", {"deviceid": deviceId, "signallingid": 30, "Buzzer": "4"}
+            "Signal", {"deviceid": deviceId, "signallingid": signal}
         )
 
     except Exception as e:
@@ -74,4 +76,3 @@ def activateReaderSignal(deviceId):
             subject="there is exception in inputState at activateReaderSIgnal",
             message=f"error: {e}",
         )
-        print(f"Error: inputState.py/activateReaderSignal={e}")

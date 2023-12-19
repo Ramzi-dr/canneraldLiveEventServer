@@ -53,8 +53,8 @@ async def listen(url, serverInfo):
                 if url == PayloadCollection.glutzWsServerUrl:
                     glutz_server_online = True
                     await asyncio.sleep(3)
-                    await MessageFilter().get_users()
-                    await MessageFilter().get_doors()
+                    await MessageFilter().update_users()
+                    await MessageFilter().update_doors()
                     if servers_num == 3 and glutz_server_online:
                         print(
                             f"from ( if servers_num == 3 and main_server_online:)glutz server is: {glutz_server_online}"

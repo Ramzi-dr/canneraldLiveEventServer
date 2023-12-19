@@ -3,15 +3,19 @@ import requests
 from emailManager import send_email
 from payloadCollection import PayloadCollection
 
+
 class RpcCommands:
     def __init__(self):
         self.url = PayloadCollection.glutzRpcServerUrl
         self.headers = PayloadCollection.headers
         self.session = requests.Session()
 
-    def make_rpc_request(self, data):
+    def make_rpc_request(
+        self,
+        data,
+    ):
         try:
-            response = self.session.get(
+            response = self.session.post(
                 url=self.url,
                 headers=self.headers,
                 verify=True,
@@ -22,110 +26,121 @@ class RpcCommands:
         except Exception as e:
             send_email(
                 subject="Exception in rpcCommands.py  make_rpc_request()",
-                message=f"Error: {e}",
+                message=f"Error: {e} ",
             )
             pass
 
     def get_userLabel(self, user_id):
         data = PayloadCollection.userGroupRelations
-        try:
-            results = self.make_rpc_request(data) or []
-            for result in results:
-                for key, value in result.items():
-                    if value == user_id:
-                        user_label = result["label"]
-                        return user_label
-        except Exception as e:
-            send_email(
-                subject="Exception in rpcCommands at get_user_label()",
-                message=f"Error: {e}",
+        results = (
+            self.make_rpc_request(
+                data,
             )
-            pass
-    def get_userIdByMedia_info(self,publicMediaLabel):
-        data = PayloadCollection.media
-        try:
-            results = self.make_rpc_request(data) or []
-            for result in results:
-                for key, value in result.items():
-                    if value == publicMediaLabel:
-                        user_id = result["userId"]
-                        return user_id
-        except Exception as e:
-            send_email(
-                subject="there is exception in rpcCommands at get_userIdByMedia_info()",
-                message=f"error: {e}",
-            )
-            pass
+            or []
+        )
+        if results:
+            try:
+                for result in results:
+                    for key, value in result.items():
+                        if value == user_id:
+                            user_label = result["label"]
+                            return user_label
+            except Exception as e:
+                send_email(
+                    subject="Exception in rpcCommands at get_user_label()",
+                    message=f"Error: {e}",
+                )
+                pass
 
+    def get_userIdByMedia_info(self, publicMediaLabel):
+        data = PayloadCollection.media
+        results = self.make_rpc_request(data) or []
+        if results:
+            try:
+                for result in results:
+                    for key, value in result.items():
+                        if value == publicMediaLabel:
+                            user_id = result["userId"]
+                            return user_id
+            except Exception as e:
+                send_email(
+                    subject="there is exception in rpcCommands at get_userIdByMedia_info()",
+                    message=f"error: {e}",
+                )
+                pass
 
     def get_doorLabel(self, accessPointId):
-        data=PayloadCollection.accessPoints
-        try:
-            results = self.make_rpc_request(data) or []
-            for result in results:
-                for key, value in result.items():
-                    if value == accessPointId:
-                        doorLabel = result["label"]
-                        return doorLabel
-        except Exception as e:
-            send_email(
-                subject="there is exception in rpcCommands at get_doorLabel()",
-                message=f"error: {e}",
-            )
-
-            pass
-
+        data = PayloadCollection.accessPoints
+        results = self.make_rpc_request(data) or []
+        if results:
+            try:
+                for result in results:
+                    for key, value in result.items():
+                        if value == accessPointId:
+                            doorLabel = result["label"]
+                            return doorLabel
+            except Exception as e:
+                send_email(
+                    subject="there is exception in rpcCommands at get_doorLabel()",
+                    message=f"error: {e}",
+                )
+                pass
 
     def get_accessPointIdByReaderId_info(self, publicMediaLabel):
         data = PayloadCollection.media
-        try:
-            results = self.make_rpc_request(data) or []
-            for result in results:
-                for key, value in result.items():
-                    if value == publicMediaLabel:
-                        user_id = result["userId"]
-                        return user_id
-        except Exception as e:
-            send_email(
-                subject="Exception in rpcCommands at get_accessPointIdByReaderId_info()",
-                message=f"Error: {e}",
-            )
-            pass
+        results = self.make_rpc_request(data) or []
+        if results:
+            try:
+                for result in results:
+                    for key, value in result.items():
+                        if value == publicMediaLabel:
+                            user_id = result["userId"]
+                            return user_id
+            except Exception as e:
+                send_email(
+                    subject="Exception in rpcCommands at get_accessPointIdByReaderId_info()",
+                    message=f"Error: {e}",
+                )
+                pass
 
     def get_doorlabel(self, accessPointId):
         data = PayloadCollection.accessPoints
-        try:
-            results = self.make_rpc_request(data) or []
-            for result in results:
-                for key, value in result.items():
-                    if value == accessPointId:
-                        door_label = result["label"]
-                        return door_label
-        except Exception as e:
-            send_email(
-                subject="Exception in rpcCommands at get_door_label()",
-                message=f"Error: {e}",
-            )
-            pass
+        results = self.make_rpc_request(data) or []
+        if results:
+            try:
+                for result in results:
+                    for key, value in result.items():
+                        if value == accessPointId:
+                            door_label = result["label"]
+                            return door_label
+            except Exception as e:
+                send_email(
+                    subject="Exception in rpcCommands at get_door_label()",
+                    message=f"Error: {e}",
+                )
+                pass
 
     def get_access_PointIdByReaderId_info(self, deviceId):
         data = PayloadCollection.devices
-        try:
-            results = self.make_rpc_request(data) or []
-            for result in results:
-                for key, value in result.items():
-                    if value == deviceId:
-                        accessPointId = result["accessPointId"]
-                        return accessPointId
-        except Exception as e:
-            send_email(
-                subject="Exception in rpcCommands at get_access_point_id_by_reader_id_info()",
-                message=f"Error: {e}",
-            )
-            pass
+        results = self.make_rpc_request(data) or []
+        if results:
+            try:
+                for result in results:
+                    for key, value in result.items():
+                        if value == deviceId:
+                            accessPointId = result["accessPointId"]
+                            return accessPointId
+            except Exception as e:
+                send_email(
+                    subject="Exception in rpcCommands at get_access_point_id_by_reader_id_info()",
+                    message=f"Error: {e}",
+                )
+                pass
 
     def activateReader_output(self, readerId, outputNum):
-        data = PayloadCollection.activate_output(deviceId=readerId, outputNum=outputNum, action=1)
+        data = PayloadCollection.activate_output(
+            deviceId=readerId, outputNum=outputNum, action=1
+        )
         try:
             self.make_rpc_request(data)
         except Exception as e:
@@ -136,7 +151,9 @@ class RpcCommands:
             pass
 
     def openDoor_short(self, deviceId, outputNum):
-        data = PayloadCollection.activate_output(deviceId=deviceId, outputNum=outputNum, action=1)
+        data = PayloadCollection.activate_output(
+            deviceId=deviceId, outputNum=outputNum, action=1
+        )
         try:
             self.make_rpc_request(data)
         except Exception as e:
@@ -153,15 +170,37 @@ class RpcCommands:
             open_action = 4
             close_action = 16
             action = None
-
             if is_Extender:
-              #  print(f"InputState : {getInputsState(deviceId=deviceId)}")
                 if getInputsState(deviceId=deviceId) in (
-                    0, 3, 4, 7, 15, 31, 63, 127, 255, 195, 67, 131, 194, 66, 130,
+                    0,
+                    3,
+                    4,
+                    7,
+                    15,
+                    31,
+                    63,
+                    127,
+                    255,
+                    195,
+                    67,
+                    131,
+                    194,
+                    66,
+                    130,
                 ):
                     action = close_action
-                elif getInputsState(deviceId=deviceId) in (
-                    1, 2, 6, 8, 16, 32, 64, 128, 65, 129, 192,
+                if getInputsState(deviceId=deviceId) in (
+                    1,
+                    2,
+                    6,
+                    8,
+                    16,
+                    32,
+                    64,
+                    128,
+                    65,
+                    129,
+                    192,
                 ):
                     action = open_action
 
@@ -269,7 +308,6 @@ class RpcCommands:
         #             message=f"error: {e}",
         #         )
         #         pass
-
 
     def activate_panic_output_7(deviceId):
         pass

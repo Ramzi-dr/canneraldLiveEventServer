@@ -9,19 +9,24 @@ class PayloadCollection:
     email_pass = os.environ.get("EMAIL_BST_PASS")
     eAccess_service_name = "eAccess.service"
     headers = {"Content-Type": "application/json"}
+    demo_server = "31.24.10.138:8333"
     # werk-fraubrunnen.onlinezuko.ch
     GlutzUrl = "werk-fraubrunnen.onlinezuko.ch"
-    glutzRpcServerUrl = f"https://{username}:{password}@{GlutzUrl}/rpc/"
+    glutzRpcServerUrl = f"http://{username}:{password}@{demo_server}/rpc/"
     backupGlutzRpcUrl = f"http://{username}:{password}@127.0.0.1:8333/rpc/"
-    glutzWsServerUrl = f"wss://{username}:{password}@{GlutzUrl}"
+    glutzWsServerUrl = f"ws://{username}:{password}@{demo_server}"
     backupServerPort = 8800
     backupServerIp = "192.168.1.251"
     backupServerUrl = f"ws://{backupServerIp}:{backupServerPort}"
     backupGlutzUrl = f"ws://{username}:{password}@127.0.0.1:8333"
-    towFactorAuthenticationId = "5025"  # in Glutz door Properties
+
+    # towFactorAuthenticationId = "5025"  # in Glutz door Properties
+    towFactorAuthenticationId = "5022"  # in Glutz door Properties
     masterDoorId = "5026"
     controlledDoorNotification = "5027"
-    masterCodeActionProfileId = "1001"  # in Glutz Codes menu profile non Default
+    # masterCodeActionProfileId = "1001"  # in Glutz Codes menu profile non Default
+    masterCodeActionProfileId = "1002"  # in Glutz Codes menu profile non Default
+    valueLabelId = "5001"
     IO_Module_Type = 103
     E_Reader_IP55_Type = 102
     E_Reader_Type = 101
@@ -148,6 +153,7 @@ class PayloadCollection:
                 "jsonrpc": "2.0",
             }
         )
+
         return payload
 
     getAuthorizationPointProperty = json.dumps(
@@ -175,45 +181,42 @@ class PayloadCollection:
             "jsonrpc": "2.0",
         }
     )
-    accessPointPropertyData = json.dumps(
-        {
-            "method": "eAccess.getModel",
-            "params": ["AccessPointPropertyData", {}, []],
-            "id": 2,
-            "jsonrpc": "2.0",
-        }
-    )
-    accessPoints = json.dumps(
-        {
-            "method": "eAccess.getModel",
-            "params": ["AccessPoints", {}, ["id", "label", "function"]],
-            "id": 8,
-            "jsonrpc": "2.0",
-        }
-    )
-    media = json.dumps(
-        {
-            "method": "eAccess.getModel",
-            "params": [
-                "Media",
-                {},
-                [
-                    "id",
-                    "userId",
-                    "actionProfileId",
-                    "uid",
-                    "publicMediaLabel",
-                    "description",
-                    "validFrom",
-                    "validTo",
-                    "mediumType",
-                    "technicalMediaId",
+
+    def accessPointPropertyData(property):
+        accessPointData = json.dumps(
+            {
+                "method": "eAccess.getModel",
+                "params": [
+                    "AccessPointPropertyData",
+                    {"propertyId": property},
+                    [],
                 ],
-            ],
-            "id": 8,
-            "jsonrpc": "2.0",
-        }
-    )
+                "id": 2,
+                "jsonrpc": "2.0",
+            }
+        )
+        return accessPointData
+
+    def media(userId):
+        media_data = json.dumps(
+            {
+                "method": "eAccess.getModel",
+                "params": [
+                    "Media",
+                    {"userId": userId},
+                    [
+                        "id",
+                        "userId",
+                        "actionProfileId",
+                        "publicMediaLabel",
+                    ],
+                ],
+                "id": 8,
+                "jsonrpc": "2.0",
+            }
+        )
+        return media_data
+
     code = json.dumps(
         {
             "method": "eAccess.getModel",
@@ -238,8 +241,19 @@ class PayloadCollection:
     master = json.dumps(
         {
             "method": "eAccess.getModel",
-            "params": ["UserPropertyData", {}],
+            "params": [
+                "UserPropertyData",
+                {"actionProfileId": masterCodeActionProfileId},
+            ],
             "id": 26,
+            "jsonrpc": "2.0",
+        }
+    )
+    accessPoints = json.dumps(
+        {
+            "method": "eAccess.getModel",
+            "params": ["AccessPoints", {}, ["id", "label", "function"]],
+            "id": 8,
             "jsonrpc": "2.0",
         }
     )

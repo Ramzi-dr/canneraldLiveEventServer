@@ -1,38 +1,37 @@
 from emailManager import send_email
 from inputsState import inputStateEvent
-from usersData import UsersData
-from doorsData import DoorsData
 import asyncio
+from doorsJsonManager import Doors_json_manager
+from usersJsonManager import Users_json_manager
 
 
 class MessageFilter:
-    users_data = []
-    doors_data = []
-
     def __init__(self):
         pass
 
-    async def get_users(self):
-        new_users_data = UsersData().usersData
-        if new_users_data != MessageFilter.users_data:
-            MessageFilter.users_data = new_users_data
-
-    async def get_doors(self):
-        new_doors_data = DoorsData().doorsData
-        if new_doors_data != MessageFilter.doors_data:
-            MessageFilter.doors_data = new_doors_data
 
     async def handel_other_message(self, message):
         if "params" in message:
-            if message["params"][0] in (
-                "AccessPointPropertyData",
+            param_message = message["params"][0]
+            if param_message in (
                 "Codes",
                 "Media",
                 "UsersGroups",
-                "Rights",'ObservedStates'
+                "Rights",
+                "ObservedStates",
+                "UserGroupRelations",
             ):
-                await self.get_doors()
-                await self.get_users()
+                print(
+                    f"there is a change in users  and the message is:        {param_message}"
+                )
+                users_json_instance = Users_json_manager()
+                await users_json_instance.update_users()
+            if message["params"][0] in ("AccessPointPropertyData",):
+                doors_json_instance = Doors_json_manager()
+                await doors_json_instance.update_doors()
+                print(
+                    f"there is changes in doors  and this is the message:    {message['params']}"
+                )
 
     async def condition_handler(self, condition):
         deviceId = None
@@ -92,6 +91,7 @@ class MessageFilter:
                     else:
                         await self.handel_other_message(message=message)
         elif type(message) is list:
+            print(f"dat is list : {message}")
             if message[0] == "ObservedStates":
                 data = message[1]["data"]
 
@@ -106,11 +106,11 @@ class MessageFilter:
                     elif key == "modified":
                         return None
         except TypeError as type:
-          #  print(f"Error  messageFilter.py/def get_door_id {type}")
+            #  print(f"Error  messageFilter.py/def get_door_id {type}")
             send_email(subject="get_door_id", message=f"error : {type}")
             return None
         # Add this method to your MessageFilter class
-        
+
     # async def get_users_with_retry(self, max_retries=3):
     #     for attempt in range(max_retries):
     #         try:
@@ -123,7 +123,7 @@ class MessageFilter:
 
     #     print(f"Failed to get users after {max_retries} attempts.")
     #     return None  # or raise an exception, depending on your use case
-    
+
     # async def get_doors_with_retry(self, max_retries=3):
     #     for attempt in range(max_retries):
     #         try:
@@ -135,4 +135,3 @@ class MessageFilter:
     #             await asyncio.sleep(2)  # Wait for a short duration before retrying
     #     print(f"Failed to get doors after {max_retries} attempts.")
     #     return None  # or raise an exception, depending on your use case
-

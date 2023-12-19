@@ -1,0 +1,42 @@
+{
+    "135": {
+        "IO_Extender": [
+            "565.135.012"
+        ],
+        "Door status notification (E-Mail)": false,
+        "Permanent open (Dauerauf)": true,
+        "E_Reader": [
+            "571.787.423"
+        ]
+    },
+    "136": {
+        "IO_Extender": [
+            "565.133.736"
+        ],
+        "Door status notification (E-Mail)": false,
+        "Permanent open (Dauerauf)": true,
+        "E_Reader": [
+            "567.534.627"
+        ]
+    },
+    "138": {
+        "IO_Module": [
+            "561.032.587"
+        ],
+        "Door status notification (E-Mail)": false,
+        "Permanent open (Dauerauf)": false,
+        "E_Reader": [
+            "559.981.097"
+        ]
+    },
+    "134": {
+        "IO_Module": [
+            "560.085.414"
+        ],
+        "Door status notification (E-Mail)": false,
+        "Permanent open (Dauerauf)": false,
+        "E_Reader": [
+            "570.823.911"
+        ]
+    }
+}
